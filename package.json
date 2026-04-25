@@ -6,7 +6,7 @@
   "readmeFilename": "README.md",
   "repository": "entva/express-sanitizeurl",
   "bugs": "https://github.com/entva/express-sanitizeurl/issues",
-  "version": "1.2.0",
+  "version": "2.0.0",
   "keywords": [
     "express",
     "expressjs",
@@ -30,25 +30,24 @@
   "scripts": {
     "clean": "rm -rf ./dist ./esm",
     "prebuild": "npm run clean",
-    "build:cjs": "tsc -p tsconfig-build.json --module commonjs --outDir dist",
+    "build:cjs": "tsc -p tsconfig-build.json --module commonjs --moduleResolution bundler --outDir dist",
     "build:esm": "tsc -p tsconfig-build.json --target es2018 --outDir esm && mv esm/index.js esm/index.mjs",
     "build": "npm run build:esm && npm run build:cjs",
     "reinstall": "rm -rf node_modules package-lock.json && npm install",
     "lint": "eslint ./",
-    "prepublishOnly": "npm run lint && npm test && echo \"\\033[0;32mReady to publish\\033[0m\"",
-    "test": "npm run build && TZ='GMT' mocha"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "check": "npm run lint && npm run typecheck && npm run test",
+    "prepublishOnly": "npm run check && echo \"\\033[0;32mReady to publish\\033[0m\""
   },
   "devDependencies": {
-    "@types/debug": "^4.1.12",
-    "@types/express": "^4.17.21",
-    "chai": "^5.1.1",
-    "eslint": "^8.57.0",
-    "eslint-config-entva-typescript-base": "^1.1.0",
-    "mocha": "^10.5.1",
-    "sinon": "^18.0.0",
-    "typescript": "^5.5.2"
+    "@types/express": "^5.0.6",
+    "eslint": "^9.39.4",
+    "eslint-config-entva-typescript-base": "^2.45.0",
+    "vitest": "^4.1.5",
+    "typescript": "^6.0.3"
   },
-  "dependencies": {
-    "debug": "^4.3.5"
+  "peerDependencies": {
+    "express": "^5.x.x"
   }
 }

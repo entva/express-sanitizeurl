@@ -1,7 +1,4 @@
 import type { Request, Response, NextFunction } from 'express';
-import logger from 'debug';
-
-const debug = logger('@entva/express-sanitizeurl');
 
 const getSafeUrl = (originalUrl: string) => {
   const [href, ...qs] = originalUrl.split('?');
@@ -15,16 +12,18 @@ const getSafeUrl = (originalUrl: string) => {
   return url;
 };
 
-export type Options = {
+export type SanitizeUrlOptions = {
   redirectTo: string,
+  logger?: (...args: unknown[]) => void,
 };
 
 const defaults = {
   redirectTo: '/',
 };
 
-const getMiddleware = (params?: Options) => {
+const createSanitizeUrl = (params?: SanitizeUrlOptions) => {
   const options = { ...defaults, ...params };
+  const { logger, redirectTo } = options;
 
   const middleware = (req: Request, res: Response, next: NextFunction) => {
     const { originalUrl } = req;
@@ -32,15 +31,14 @@ const getMiddleware = (params?: Options) => {
     try {
       decodeURIComponent(originalUrl);
     } catch (err) {
-      const url = options.redirectTo;
-      debug(`couldn't parse ${originalUrl}, redirecting to ${url}`);
-      return res.redirect(301, url);
+      logger?.(`couldn't parse ${originalUrl}, redirecting to ${redirectTo}`);
+      return res.redirect(301, redirectTo);
     }
 
     const safeUrl = getSafeUrl(originalUrl);
 
     if (originalUrl !== safeUrl) {
-      debug(`${originalUrl} isn't valid, redirecting to ${safeUrl}`);
+      logger?.(`${originalUrl} isn't valid, redirecting to ${safeUrl}`);
       return res.redirect(301, safeUrl);
     }
 
@@ -50,4 +48,4 @@ const getMiddleware = (params?: Options) => {
   return middleware;
 };
 
-export default getMiddleware;
+export default createSanitizeUrl;

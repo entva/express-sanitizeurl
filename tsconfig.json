@@ -7,7 +7,7 @@
     "forceConsistentCasingInFileNames": true,
     "esModuleInterop": true,
     "module": "ESNext",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "declaration": true,
     "sourceMap": false,
     "isolatedModules": true,
@@ -15,6 +15,6 @@
     "verbatimModuleSyntax": false,
     "outDir": "./dist",
   },
-  "include": ["**/*.ts", "**/*.mjs"],
+  "include": ["**/*.ts", "**/*.mjs", "**/*.js"],
   "exclude": ["node_modules", "./dist", "./esm"]
 }
