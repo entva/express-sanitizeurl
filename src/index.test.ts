@@ -1,77 +1,81 @@
+import type { Request, Response, NextFunction } from 'express';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import getMiddleware from '../esm/index.mjs';
+import getMiddleware from './index';
 
 const middleware = getMiddleware();
 
 describe('SanitizeUrl suite', () => {
   let req: { originalUrl: string };
-  let res: { redirect: ReturnType<typeof vi.fn> };
+  let res: { status: ReturnType<typeof vi.fn>, redirect: ReturnType<typeof vi.fn> };
   let next: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
     req = { originalUrl: '' };
-    res = { redirect: vi.fn() };
+    res = { status: vi.fn(), redirect: vi.fn() };
+    res.status.mockReturnValue(res);
     next = vi.fn();
   });
+
+  const call = () => middleware(req as unknown as Request, res as unknown as Response, next as unknown as NextFunction);
 
   it('url with weird characters', () => {
     req.originalUrl += '/%c0%ae%c0%ae';
 
-    middleware(req, res, next);
+    call();
     expect(next).not.toHaveBeenCalled();
-    expect(res.redirect).toHaveBeenCalledOnce();
-    expect(res.redirect).toHaveBeenCalledWith(301, '/');
+    expect(res.status).toHaveBeenCalledWith(301);
+    expect(res.redirect).toHaveBeenCalledWith('/');
   });
 
   it('url with multiple slashes', () => {
     req.originalUrl += '///lol/kek//////wow';
 
-    middleware(req, res, next);
+    call();
     expect(next).not.toHaveBeenCalled();
-    expect(res.redirect).toHaveBeenCalledOnce();
-    expect(res.redirect).toHaveBeenCalledWith(301, '/lol/kek/wow');
+    expect(res.status).toHaveBeenCalledWith(301);
+    expect(res.redirect).toHaveBeenCalledWith('/lol/kek/wow');
   });
 
   it('short url with multiple slashes', () => {
     req.originalUrl += '//////';
 
-    middleware(req, res, next);
+    call();
     expect(next).not.toHaveBeenCalled();
-    expect(res.redirect).toHaveBeenCalledOnce();
-    expect(res.redirect).toHaveBeenCalledWith(301, '/');
+    expect(res.status).toHaveBeenCalledWith(301);
+    expect(res.redirect).toHaveBeenCalledWith('/');
   });
 
   it('url with multiple slashes and double query string', () => {
     req.originalUrl += '///lol/kek//////wow?query?is=amazing?isnt=it&i=agree&with?this&nonsense';
 
-    middleware(req, res, next);
+    call();
     expect(next).not.toHaveBeenCalled();
-    expect(res.redirect).toHaveBeenCalledOnce();
-    expect(res.redirect).toHaveBeenCalledWith(301, '/lol/kek/wow?query&is=amazing&isnt=it&i=agree&with&this&nonsense');
+    expect(res.status).toHaveBeenCalledWith(301);
+    expect(res.redirect).toHaveBeenCalledWith('/lol/kek/wow?query&is=amazing&isnt=it&i=agree&with&this&nonsense');
   });
 
   it('url with double query string', () => {
     req.originalUrl += '/some/such?query=yes&more=yes?what=haha&another=query!';
 
-    middleware(req, res, next);
+    call();
     expect(next).not.toHaveBeenCalled();
-    expect(res.redirect).toHaveBeenCalledOnce();
-    expect(res.redirect).toHaveBeenCalledWith(301, '/some/such?query=yes&more=yes&what=haha&another=query!');
+    expect(res.status).toHaveBeenCalledWith(301);
+    expect(res.redirect).toHaveBeenCalledWith('/some/such?query=yes&more=yes&what=haha&another=query!');
   });
 
   it('url with empty query string', () => {
     req.originalUrl += '/some/such?';
 
-    middleware(req, res, next);
+    call();
     expect(next).not.toHaveBeenCalled();
-    expect(res.redirect).toHaveBeenCalledOnce();
-    expect(res.redirect).toHaveBeenCalledWith(301, '/some/such');
+    expect(res.status).toHaveBeenCalledWith(301);
+    expect(res.redirect).toHaveBeenCalledWith('/some/such');
   });
 
   it('regular url', () => {
     req.originalUrl += '/regular/url';
 
-    middleware(req, res, next);
+    call();
     expect(res.redirect).not.toHaveBeenCalled();
     expect(next).toHaveBeenCalledOnce();
   });
@@ -79,7 +83,7 @@ describe('SanitizeUrl suite', () => {
   it('regular url with query string', () => {
     req.originalUrl += '/regular/url?search=things';
 
-    middleware(req, res, next);
+    call();
     expect(res.redirect).not.toHaveBeenCalled();
     expect(next).toHaveBeenCalledOnce();
   });

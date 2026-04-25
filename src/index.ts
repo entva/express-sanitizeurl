@@ -32,14 +32,14 @@ const createSanitizeUrl = (params?: SanitizeUrlOptions) => {
       decodeURIComponent(originalUrl);
     } catch (err) {
       logger?.(`couldn't parse ${originalUrl}, redirecting to ${redirectTo}`);
-      return res.redirect(301, redirectTo);
+      return res.status(301).redirect(redirectTo);
     }
 
     const safeUrl = getSafeUrl(originalUrl);
 
     if (originalUrl !== safeUrl) {
       logger?.(`${originalUrl} isn't valid, redirecting to ${safeUrl}`);
-      return res.redirect(301, safeUrl);
+      return res.status(301).redirect(safeUrl);
     }
 
     next();
