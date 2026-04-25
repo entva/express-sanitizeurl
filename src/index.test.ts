@@ -16,7 +16,11 @@ describe('SanitizeUrl suite', () => {
     next = vi.fn();
   });
 
-  const call = () => middleware(req as unknown as Request, res as unknown as Response, next as unknown as NextFunction);
+  const call = () => middleware(
+    req as unknown as Request,
+    res as unknown as Response,
+    next as unknown as NextFunction,
+  );
 
   it('url with weird characters', () => {
     req.originalUrl += '/%c0%ae%c0%ae';
